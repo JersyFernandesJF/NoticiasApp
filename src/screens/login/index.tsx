@@ -3,14 +3,26 @@ import { StyleSheet, Text, View, TouchableOpacity, TextInput, KeyboardAvoidingVi
 import auth from '@react-native-firebase/auth'
    
 export default function  login() {
-      const [email, setEmail] = useState('')
-      const [password, setPassword] = useState('')
-      const [ errorLogin, setErrorLogin ] = useState('')
+      const [email, setEmail] = useState(null)
+      const [password, setPassword] = useState(null)
+      const [errorEmail, setErrorEmail] = useState(null)
+      const [ errorPassword, setErrorPassword] = useState(null)
+     
       const [ isLoading, setIsLoading ] = useState(false)
-      const [ action, setAction ] = useState('Login')
+
+      const verification = () => {
+        let error = false
+        setErrorEmail(null)
+        const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        if (!re.test(String(email).toLowerCase()) || password == null ){
+          alert("Preencha os campos corretamente")
+          error = true
+        }
+        return !error
+      }
    
     function handleSignIn () {
-         
+        if(verification()){
        setIsLoading(true)
 
        auth()
@@ -18,10 +30,12 @@ export default function  login() {
        .then(()=> Alert.alert("Logado com Sucesso!"))
        .catch((error) => console.log(error))
        .finally(() => setIsLoading(false))
+        }
       
     }
     function handleNewAccount () {
          
+      if(verification()) {
       setIsLoading(true)
 
       auth()
@@ -29,7 +43,7 @@ export default function  login() {
       .then(()=> Alert.alert("Conta", "Cadastrado com Sucesso!"))
       .catch((error)=> console.log(error))
       .finally(() => setIsLoading(false))
-     
+      }
    }
     
       
@@ -42,7 +56,10 @@ export default function  login() {
                   placeholder="Email"
                   placeholderTextColor="#003f5c"
                   value= {email}
-                  onChangeText = { (text)=> setEmail(text)}
+                  onChangeText = { (text)=> {setEmail(text)
+                   setErrorEmail(null)}}
+                  returnKeyType = "done"
+                  errorMessage={errorEmail}
                 />
          
  
@@ -52,7 +69,12 @@ export default function  login() {
                   placeholderTextColor="#003f5c"
                   secureTextEntry={true}
                   value={password}
-                  onChangeText = { (text) => setPassword(text)}
+                  onChangeText = { (text) =>{ setPassword(text)
+                  setErrorPassword(null)
+                }
+                }
+                 errorMessage={errorPassword}
+                  returnKeyType = "done"
                 />
           
       
@@ -60,8 +82,16 @@ export default function  login() {
       <TouchableOpacity style={styles.loginBtn} onPress={handleSignIn}>
         <Text style={[styles.loginText,{ color: 'white'}]}>LOGIN</Text>
       </TouchableOpacity>
+
       <TouchableOpacity onPress={handleNewAccount} >
-        <Text style={[styles.forgot_button, {marginTop: 50}]}>Register</Text>
+        <View style={{  width: 240,
+        height: 50,
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 40,
+        borderWidth: 2 }}>
+        <Text >Register</Text>
+        </View>
       </TouchableOpacity>
 
 
@@ -87,10 +117,7 @@ const styles = StyleSheet.create({
         borderRadius: 20
     },
      
-      forgot_button: {
-        height: 30,
-        marginBottom: 30,
-      },
+     
      
       loginBtn: {
         width: 240,
